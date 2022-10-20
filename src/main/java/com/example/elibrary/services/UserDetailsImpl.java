@@ -6,6 +6,7 @@
 package com.example.elibrary.services;
 
 import com.example.elibrary.models.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +23,7 @@ public class UserDetailsImpl implements UserDetails {
         this.user = user;
     }
     
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;

@@ -5,9 +5,17 @@
  */
 package com.example.elibrary.controllers;
 
+import com.example.elibrary.models.Book;
+import com.example.elibrary.models.User;
+import com.example.elibrary.requests.AddBookDTO;
+import com.example.elibrary.requests.UpdateBookDTO;
+import com.example.elibrary.responses.OkResponse;
+import com.example.elibrary.services.BookService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
+import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +33,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @RestController
 @RequestMapping("/books")
-public class BookController {
+public class BookController extends BaseController {
+    
+    @Autowired
+    BookService service;
     
     @GetMapping()
     public List<Object> list() {
@@ -33,28 +44,43 @@ public class BookController {
     }
     
     @GetMapping("/{id}")
-    public Object get(@PathVariable String id) {
-        return null;
+    public ResponseEntity<?> get(@PathVariable String id) {
+        Book book = this.service.get(id);
+        return ResponseEntity.ok().body(new OkResponse("Book", book));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> put(@PathVariable String id, @RequestBody Object input) {
-        return null;
+    public ResponseEntity<?> put(@PathVariable String id, @RequestBody UpdateBookDTO input) {
+        
+        /**
+         * Confirm Book ID
+         * 
+         */
+        Book book = this.service.get(id);
+        
+        
+        //
+        return ResponseEntity.ok().body(new OkResponse("Book updated successfully", getUser()));
     }
     
     @PostMapping
-    public ResponseEntity<?> post(@RequestBody Object input) {
-        return null;
+    public ResponseEntity<?> post(@Valid @RequestBody AddBookDTO input) {
+        
+        /**
+         * Add
+         */
+        Book book = input.toBook();
+        book.setUser(getUser());
+        
+        //
+        book = this.service.create(book);
+        
+        //
+        return ResponseEntity.ok(new OkResponse("Book added successfully", book));
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
         return null;
     }
-    
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Error message")
-    public void handleError() {
-    }
-    
 }

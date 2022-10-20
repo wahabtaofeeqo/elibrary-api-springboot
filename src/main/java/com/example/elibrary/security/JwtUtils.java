@@ -10,11 +10,12 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -29,36 +30,37 @@ public class JwtUtils {
     @Value("${jwt.secret}")
     private String secret;
     
+
     public String getUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJwt(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(generalKey()).build()
+                .parseClaimsJws(token).getBody().getSubject();
     }
     
     public String generateToken(Authentication auth) {
         
         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        
-        Map<String, Object> claims = new HashMap<>();
-                
         return Jwts.builder()
-                .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setSubject(details.getUsername())
-                .setExpiration(new Date((new Date()).getTime() + 60 * 1000))
-                .signWith(SignatureAlgorithm.HS512, this.secret).compact();
+                .setExpiration(new Date((new Date()).getTime() + 86400000))
+                .signWith(generalKey()).compact();
     }
     
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJwt(token);
+            Jwts.parserBuilder().setSigningKey(generalKey()).build().parseClaimsJws(token);
             return true;
         } 
-        catch (ExpiredJwtException | MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException e) {
+        catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | SignatureException | IllegalArgumentException e) {
             System.err.println("Auth failed: " + e.getMessage());
         }
         return false;
+    }
+    
+    public Key generalKey() {
+        byte[] encodedKey = Base64.getDecoder().decode(secret);
+        Key key = new SecretKeySpec(encodedKey, 0, encodedKey.length, "HmacSHA512");
+        return key;
     }
 }

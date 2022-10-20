@@ -6,9 +6,7 @@
 package com.example.elibrary.exceptions;
 
 import com.example.elibrary.responses.ErrResponse;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -37,15 +34,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             .getFieldErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.toList());
     
-        ErrResponse response = new ErrResponse(false, "Validation Error", errors);
+        ErrResponse response = new ErrResponse("Validation Error", errors);
         
         //
-        return ResponseEntity.status(status).body(response);
-    }
-
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Object> handleException(Exception exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        ErrResponse response = new ErrResponse(exception.getMessage(), null);
         return ResponseEntity.status(status).body(response);
     }
 }

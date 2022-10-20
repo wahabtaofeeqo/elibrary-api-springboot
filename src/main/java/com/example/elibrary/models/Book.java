@@ -7,8 +7,8 @@ package com.example.elibrary.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,10 +16,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.persistence.Temporal;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -28,16 +30,16 @@ import org.hibernate.annotations.UpdateTimestamp;
  * @author user
  */
 @Data
-@Entity(name = "users")
-public class User implements Serializable {
+@Entity(name = "books")
+public class Book implements Serializable {
 
-    public User() {
+    public Book() {
     }
-     
-    public User(String name, String email, String password) {
-        this.name = name;
-        this.username = email;
-        this.password = password;
+    
+    public Book(String author, String title, String description) {
+        this.author = author;
+        this.title = title;
+        this.description = description;
     }
     
     @Id
@@ -46,18 +48,17 @@ public class User implements Serializable {
     private UUID id;
     
     @Column
-    private String name;
-    
-    @Column(unique = true)
-    private String username;
+    private String author;
+     
+    @Column
+    private String title;
     
     @Column
-    @JsonIgnore
-    private String password;
+    private String description;
     
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private Set<Book> books;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
     
     @UpdateTimestamp
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
@@ -67,3 +68,4 @@ public class User implements Serializable {
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date updated_at;
 }
+
