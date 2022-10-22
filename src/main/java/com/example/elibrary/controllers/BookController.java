@@ -5,16 +5,20 @@
  */
 package com.example.elibrary.controllers;
 
+import com.example.elibrary.interfaces.BookMapper;
 import com.example.elibrary.models.Book;
-import com.example.elibrary.models.User;
 import com.example.elibrary.requests.AddBookDTO;
 import com.example.elibrary.requests.UpdateBookDTO;
 import com.example.elibrary.responses.OkResponse;
 import com.example.elibrary.services.BookService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
 import javax.validation.Valid;
+
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,9 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  *
@@ -36,11 +37,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class BookController extends BaseController {
     
     @Autowired
-    BookService service;
-    
+    private BookService service;
+
     @GetMapping()
-    public List<Object> list() {
-        return null;
+    public ResponseEntity<?> list(@RequestParam int page, @RequestParam int limit) {
+        List<Book> books = this.service.paginate(page, limit);
+        return this.okResponse("Books", books);
     }
     
     @GetMapping("/{id}")
@@ -53,14 +55,20 @@ public class BookController extends BaseController {
     public ResponseEntity<?> put(@PathVariable String id, @RequestBody UpdateBookDTO input) {
         
         /**
-         * Confirm Book ID
+         * Get Book
          * 
          */
         Book book = this.service.get(id);
-        
-        
+        BookMapper.mapper.updateBookFromDTO(input, book);
+
+        /**
+         * Update
+         * 
+         */
+        book = this.service.create(book);
+
         //
-        return ResponseEntity.ok().body(new OkResponse("Book updated successfully", getUser()));
+        return this.okResponse("Book updated successfully", book);
     }
     
     @PostMapping
