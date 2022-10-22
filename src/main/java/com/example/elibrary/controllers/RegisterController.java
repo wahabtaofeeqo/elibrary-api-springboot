@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author user
  */
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/auth")
 public class RegisterController {
     
     @Autowired
@@ -43,7 +44,7 @@ public class RegisterController {
     @Autowired
     AuthenticationManager authenticationManager;
     
-    @PostMapping("/register")
+    @PostMapping("register")
     public ResponseEntity<OkResponse> register(@Valid @RequestBody RegisterDTO dto) {
         
         /**
@@ -53,10 +54,10 @@ public class RegisterController {
         User user = service.create(dto.toUser());
         
         //
-        return ResponseEntity.ok().body(new OkResponse(true, "Account created successfully", user));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new OkResponse(true, "Account created successfully", user));
     }
     
-    @PostMapping("/login")
+    @PostMapping("login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginDTO dto) {
         
         /**

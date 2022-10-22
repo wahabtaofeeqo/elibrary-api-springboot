@@ -7,7 +7,6 @@ package com.example.elibrary.configs;
 
 import com.example.elibrary.security.AuthEntryPoint;
 import com.example.elibrary.security.TokenAuthenticationFilter;
-import com.example.elibrary.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
